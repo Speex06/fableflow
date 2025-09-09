@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElevenLabs TTS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Text to Speech with ElevenLabs</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="form-group">
+        <textarea name="text" rows="6" class="form-control" placeholder="Enter your text...">{{ request.form.text or '' }}</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-3">
+          <label>Speed</label>
+          <input type="number" step="0.1" name="speed" value="{{ request.form.speed or 1 }}" class="form-control">
+        </div>
+        <div class="form-group col-md-3">
+          <label>Stability</label>
+          <input type="range" min="0" max="100" name="stability" value="{{ request.form.stability or 50 }}" class="form-control">
+        </div>
+        <div class="form-group col-md-3">
+          <label>Similarity</label>
+          <input type="range" min="0" max="100" name="similarity" value="{{ request.form.similarity or 75 }}" class="form-control">
+        </div>
+        <div class="form-group col-md-3">
+          <label>Style</label>
+          <input type="range" min="0" max="100" name="style_exaggeration" value="{{ request.form.style_exaggeration or 0 }}" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Generate Audio</button>
+    </form>
+
+    {% if audio_files %}
+      <div class="mt-4">
+        <h3>Previous Audios</h3>
+        <ul class="list-group">
+          {% for file in audio_files %}
+            <li class="list-group-item">
+              <strong>{{ file }}</strong>
+              <audio controls {% if file == audio_filename %}autoplay{% endif %} class="d-block mt-2">
+                <source src="{{ url_for('main.serve_audio', filename=file) }}" type="audio/mpeg">
+              </audio>
+              <a href="{{ url_for('main.serve_audio', filename=file) }}" download class="btn btn-sm btn-success mt-1">Download</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
